@@ -53,6 +53,14 @@ Each topic below should be explored one at a time, with intuitive explanations a
 - [x] High-level overview delivered (all 6 pillars)
 - [ ] Topic 1 not yet started — this is where the next session should begin
 
+## Coding Standards
+
+1. **Readability is the #1 objective.** Code must be instantly understandable.
+2. Use descriptive variable names — no abbreviations unless universally obvious.
+3. Break complex one-liners into multiple lines with intermediate variables.
+4. No comments (per instructions.md).
+5. No showing off short/clever code. Clarity over brevity, always.
+
 ## How to Continue
 
 Tell the next agent:
