@@ -51,7 +51,8 @@ Each topic below should be explored one at a time, with intuitive explanations a
 ## Current Progress
 
 - [x] High-level overview delivered (all 6 pillars)
-- [ ] Topic 1 not yet started — this is where the next session should begin
+- [x] Forward vs Inverse understood via ball toy example (R1–R7, demos/r1 and r2)
+- [ ] Topic 1: Core insight with a real PDE (Burgers' equation) — next
 
 ## Coding Standards
 
