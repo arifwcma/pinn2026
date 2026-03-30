@@ -48,11 +48,44 @@ Each topic below should be explored one at a time, with intuitive explanations a
 - [ ] **Topic 8**: Practical details — network architecture choices, L-BFGS optimizer, collocation point sampling (Latin Hypercube), sensitivity to hyperparameters.
 - [ ] **Topic 9**: Hands-on — build a minimal PINN from scratch in Python/PyTorch for Burgers' equation.
 
-## Current Progress
+## Session 1 Progress (R1–R19)
 
+### What was covered:
 - [x] High-level overview delivered (all 6 pillars)
-- [x] Forward vs Inverse understood via ball toy example (R1–R7, demos/r1 and r2)
-- [ ] Topic 1: Core insight with a real PDE (Burgers' equation) — next
+- [x] Forward vs Inverse understood via ball toy example (R1–R7)
+  - Forward: know the equation, learn the solution (demos/r1_forward_ball.py)
+  - Inverse: have observations, learn unknown parameters (demos/r2_inverse_ball.py)
+  - Key difference in code: `nn.Parameter` for trainable gravity vs constant
+- [x] Core PINN mechanics understood: loss = loss_data + loss_physics
+  - Physics residual = plug network's prediction into the PDE, measure how far from zero
+  - autograd.grad computes derivatives w.r.t. inputs (not weights) — treat `create_graph=True` and `grad_outputs=ones` as PyTorch boilerplate
+- [x] Burgers' equation forward demo (R9–R11, demos/r10_burgers_forward.py)
+  - Jump from ODE (1 input) to PDE (2 inputs: t, x)
+  - Three autograd calls: u_t, u_x, u_xx
+- [x] General PDE template from the paper: u_t + N[u; λ] = 0 (R13–R14)
+  - N is a nonlinear operator (calligraphic N), different for each equation
+  - Every example in the paper fits this template
+- [x] Paper structure: continuous/discrete × forward/inverse grid confirmed (R15)
+  - Continuous forward: Schrödinger | Discrete forward: Allen-Cahn
+  - Continuous inverse: Navier-Stokes | Discrete inverse: KdV
+  - Burgers' used in appendices for systematic studies across all four
+- [x] Started Schrödinger deep-dive (R16–R19)
+  - Equation describes wave evolution: spreading vs self-focusing
+  - Three loss terms: loss_initial + loss_boundary + loss_physics
+  - Periodic boundary conditions and complex-valued output introduced but NOT yet explained
+  - Created demos/s1_schrodinger_visualize.py to visualize the wave evolution
+
+### Where to resume:
+- [ ] Explain periodic boundary conditions (what "wrapping around" means concretely)
+- [ ] Explain how complex-valued solutions are handled by the neural network (two outputs: real + imaginary)
+- [ ] Then the Schrödinger PINN loss terms in detail
+- [ ] Remaining topics from the BFS plan (Topics 3–9 above)
+
+### Communication conventions:
+- Every response is tagged R1, R2, R3... so learner can refer back
+- Last response was R19
+- Use $...$ and $$...$$ for math (NOT \\( \\) — those don't render in Cursor)
+- Use Unicode Σ, ², ᵢ etc. as fallback if LaTeX fails
 
 ## Coding Standards
 
