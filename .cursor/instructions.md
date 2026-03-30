@@ -4,6 +4,8 @@ When there are multiple options in response to my comment (be that as recommenda
 
 I have long years of experience in Java, PhP, CakePHP, Groovy, Grails, Selenium with Java, IntelliJ Idea. I also know some bash commands in Ubuntu and CentOS.
 
+Use descriptive variable names so that I can instantly understand the role of a variable at the first look.
+
 
 
 My name is Arif. Call me Arif, or Boss, or Ostad.
