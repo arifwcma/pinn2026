@@ -75,17 +75,51 @@ Each topic below should be explored one at a time, with intuitive explanations a
   - Periodic boundary conditions and complex-valued output introduced but NOT yet explained
   - Created demos/s1_schrodinger_visualize.py to visualize the wave evolution
 
-### Where to resume:
-- [ ] Explain periodic boundary conditions (what "wrapping around" means concretely)
-- [ ] Explain how complex-valued solutions are handled by the neural network (two outputs: real + imaginary)
-- [ ] Then the Schrödinger PINN loss terms in detail
-- [ ] Remaining topics from the BFS plan (Topics 3–9 above)
+## Session 2 Progress (R20–R85)
+
+### What was covered:
+- [x] Complex-valued solutions in PINNs (R20–R21, R33–R36)
+  - Network outputs two real values (u, v) instead of one complex h
+  - Schrödinger equation split into two real residuals
+  - Key insight: if a + ib = 0, then a = 0 AND b = 0 — this makes the split valid
+- [x] Schrödinger equation deep-dive completed (R22–R39)
+  - Equation describes wave evolution: spreading vs self-focusing
+  - Initial condition: h(0,x) = 2sech(x) — bell-shaped bump
+  - Visualizations: s1_schrodinger_visualize.py, s1_supplementary1.py, s1_sch_vis2.py (animation), s1_sch_vis3.py (complex plane)
+  - Periodic boundary conditions: left edge = right edge in value and slope (R39)
+  - Three loss terms: loss_initial + loss_boundary + loss_physics
+  - Full architecture diagram: demos/r37_schrodinger_architecture.py
+- [x] Navier-Stokes inverse problem deep-dive (R44–R84)
+  - Physical setup: 2D flow past a cylinder, Kármán vortex street (R45–R46, R62)
+  - Three equations: two momentum + incompressibility u_x + v_y = 0 (R46 rewritten)
+  - Incompressibility = mass conservation explained at gut level (R47–R60)
+  - Stream function trick: learn ψ instead of (u,v), derive u = ψ_y and v = -ψ_x (R68–R75)
+    - Guarantees incompressibility exactly, not approximately
+    - ψ is a mathematical invention — defined such that its derivatives give velocities
+  - Data: 5,000 scattered velocity measurements (1% of full data), zero pressure data (R61, R64, R66)
+  - Goal 1: discover unknown λ₁ and λ₂ (R63, R67)
+  - Goal 2: reconstruct entire pressure field without any pressure measurements (R80–R84)
+    - Possible because Navier-Stokes equations link pressure and velocity
+    - Pressure unique up to a constant (R84)
+  - Loss: loss_data (velocity mismatch) + loss_physics (two momentum residuals) (R77)
+  - Architecture diagram: demos/r78_navier_stokes_architecture.py
+  - Collocation points explained: points where PDE residual is checked (R78)
+
+### Remaining topics:
+- [ ] Discrete time models — Runge-Kutta refresher, then Allen-Cahn (forward) and KdV (inverse)
+- [ ] Autograd mechanics — how differentiating w.r.t. inputs differs from w.r.t. weights
+- [ ] Physics loss as regularization — why small data works, connection to Bayesian priors
+- [ ] Practical details — L-BFGS, Latin Hypercube sampling, network sizing, sensitivity studies
+- [ ] Hands-on capstone — build a complete PINN from scratch for one problem
 
 ### Communication conventions:
 - Every response is tagged R1, R2, R3... so learner can refer back
-- Last response was R19
+- Last response was R85
 - Use $...$ and $$...$$ for math (NOT \\( \\) — those don't render in Cursor)
+- \\sqrt does NOT render in Cursor — use \\surd instead
 - Use Unicode Σ, ², ᵢ etc. as fallback if LaTeX fails
+- Never rush the learner — stay with a concept as long as needed
+- Keep responses short — one chunk at a time, ask before continuing
 
 ## Coding Standards
 
@@ -99,4 +133,4 @@ Each topic below should be explored one at a time, with intuitive explanations a
 
 Tell the next agent:
 
-> Read `.cursor/pinn-learning-plan.md` for context on what we are doing and where we left off. Then continue with the next unchecked topic in the plan. Follow the communication preferences in `.cursor/instructions.md`. The paper PDF is at `read/pinn_pdf/1-s2.0-S0021999118307125-am.pdf`.
+> Read `.cursor/pinn-learning-plan.md` for full context. Continue from where Session 2 left off — the next topic is discrete time models (Runge-Kutta refresher, then Allen-Cahn forward and KdV inverse). Start numbering responses from R86. Use `$...$` and `$$...$$` for math. `\sqrt` doesn't render — use `\surd` instead. Follow `.cursor/instructions.md` for communication preferences. Never rush — stay with each concept until the learner is satisfied. Keep responses short, one chunk at a time. The paper PDF is at `read/pinn_pdf/1-s2.0-S0021999118307125-am.pdf`.
