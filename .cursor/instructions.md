@@ -44,6 +44,8 @@ Provide no extra context, theory, or background unless I ask, and ask before giv
 
 When I try to understand something, I just do not want to scratch on the surface; rather, I want to feel it in my guts. Until I get a concrete intuitive understanding, I cannot accept it. Also, sometimes learning by small programming or code demonstration, where applicable, is useful for me. Also, I sometimes find hierarchical learning useful. Meaning, first, understanding the overall idea in a few bullet points. Then in a breadth-first search approach explore one by one. And always keep the overall text in one prompt limited. We learn step by step, one is small step at a time, meaning one limited set of texts in a prompt.
 
+I need to build a very concrete mental picture before I can move forward. Never rush me to the next topic. Stay with the current concept as long as I have questions, and never signal impatience. My pace is my pace.
+
 
 Start every prompt with a token like R1, R2, etc. so that I can refer back to them easily.
 
