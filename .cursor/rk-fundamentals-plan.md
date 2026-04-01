@@ -13,16 +13,18 @@ We are building up from basics. No concept is assumed known unless explicitly co
 5. [x] Taylor series: what it is, why it works, the general pattern (R97–R108)
    - Derived from repeated application of fundamental theorem of calculus
    - Each unfolding peels off one term: s^n/n! · f^(n)(0)
-6. [ ] Why Taylor series is impractical for real ODE problems (need u'', u''' etc.)
-7. [ ] The RK idea: achieve Taylor-level accuracy using only F evaluations at clever points
-8. [ ] RK1 (Euler) — one slope, first-order
-9. [ ] RK2 — two slopes, second-order, derive the weights
-10. [ ] RK4 — four slopes, the classic method
-11. [ ] General RK: q stages, Butcher tableau
+6. [x] Why Taylor series is impractical for real ODE problems (R109, R112)
+   - Need u'', u''' etc. which require computing F', F'' — explodes in complexity
+7. [x] The RK idea: achieve Taylor-level accuracy using only F evaluations at clever points (R112, R114)
+8. [x] RK1 (Euler) — one slope, first-order (R114)
+9. [x] RK2 — two slopes, second-order, derive the weights (R115–R123, plot R120)
+10. [ ] RK3 — three slopes, third-order ← RESUME HERE
+11. [ ] RK4 — four slopes, the classic method
+12. [ ] General RK: q stages, Butcher tableau
 
 ## After ENTER_RK
 
-12. [ ] Explicit vs Implicit RK — what's the difference
-13. [ ] Why implicit matters (stability for stiff problems)
-14. [ ] How PINN paper uses implicit RK with hundreds of stages
-15. [ ] Back to the paper: Allen-Cahn (discrete forward) and KdV (discrete inverse)
+13. [ ] Explicit vs Implicit RK — what's the difference
+14. [ ] Why implicit matters (stability for stiff problems)
+15. [ ] How PINN paper uses implicit RK with hundreds of stages
+16. [ ] Back to the paper: Allen-Cahn (discrete forward) and KdV (discrete inverse)

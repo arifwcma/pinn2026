@@ -46,6 +46,8 @@ When I try to understand something, I just do not want to scratch on the surface
 
 I need to build a very concrete mental picture before I can move forward. Never rush me to the next topic. Stay with the current concept as long as I have questions, and never signal impatience. My pace is my pace.
 
+When introducing math quantities (like k1, k2 in Runge-Kutta), always follow the formula with a plain-English one-liner explaining what it physically means. For example: k1 = "how much u would change using the starting slope for a full step". These one-liners are what make concepts click for me.
+
 
 Start every prompt with a token like R1, R2, etc. so that I can refer back to them easily.
 

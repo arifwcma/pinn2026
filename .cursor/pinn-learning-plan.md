@@ -114,12 +114,13 @@ Each topic below should be explored one at a time, with intuitive explanations a
 
 ### Communication conventions:
 - Every response is tagged R1, R2, R3... so learner can refer back
-- Last response was R85
+- Last response was R125 (Session 3 ended here)
 - Use $...$ and $$...$$ for math (NOT \\( \\) — those don't render in Cursor)
 - \\sqrt does NOT render in Cursor — use \\surd instead
 - Use Unicode Σ, ², ᵢ etc. as fallback if LaTeX fails
 - Never rush the learner — stay with a concept as long as needed
 - Keep responses short — one chunk at a time, ask before continuing
+- When introducing math quantities (like k1, k2), always follow the formula with a plain-English one-liner explaining what it physically means
 
 ## Coding Standards
 
@@ -129,8 +130,53 @@ Each topic below should be explored one at a time, with intuitive explanations a
 4. No comments (per instructions.md).
 5. No showing off short/clever code. Clarity over brevity, always.
 
+## Session 3 Progress (R86–R125)
+
+### What was covered:
+- [x] Runge-Kutta fundamentals — bottom-up from Taylor series (R93–R125)
+  - Taylor series derivation from first principles using fundamental theorem of calculus (R97–R108)
+  - Why Taylor is impractical for real ODEs: need higher derivatives of F (R109, R112)
+  - The RK idea: achieve Taylor-level accuracy using only F evaluations at clever points (R112, R114)
+  - RK1 (Euler): 1 stage, 1st order — just one slope at the start (R114)
+  - RK2: 2 stages, 2nd order — sample slope at start AND at a trial point (R115–R125)
+    - k1 = Δt · F(tₙ, uₙ) = "how much u would change using starting slope for a full step"
+    - k2 = Δt · F(tₙ + αΔt, uₙ + αk1) = "how much u would change using trial-position slope for a full step"
+    - Weights: ½k1 + ½k2 is one common choice (not the only one)
+  - Visualization: demos/r120_rk2_visualize.py — shows slopes, trial point, Euler vs RK2 vs true
+  - Visualization: demos/r94_taylor_buildup.py — linear approximation and error
+  - Visualization: demos/r95_taylor_second_order.py — 1st vs 2nd order Taylor comparison
+
+### Remaining Runge-Kutta path (see `.cursor/rk-fundamentals-plan.md` for full tracker):
+- [ ] RK3 — three slopes, third-order ← **RESUME HERE**
+- [ ] RK4 — four slopes, the classic method
+- [ ] General RK: q stages, Butcher tableau
+- [ ] Explicit vs Implicit RK — what's the difference
+- [ ] Why implicit matters (stability for stiff problems)
+- [ ] How PINN paper uses implicit RK with hundreds of stages
+- [ ] Back to paper: Allen-Cahn (discrete forward) and KdV (discrete inverse)
+
+### Remaining topics (after RK path):
+- [ ] Autograd mechanics — how differentiating w.r.t. inputs differs from w.r.t. weights
+- [ ] Physics loss as regularization — why small data works, connection to Bayesian priors
+- [ ] Practical details — L-BFGS, Latin Hypercube sampling, network sizing, sensitivity studies
+- [ ] Hands-on capstone — build a complete PINN from scratch for one problem
+
 ## How to Continue
 
 Tell the next agent:
 
-> Read `.cursor/pinn-learning-plan.md` for full context. Continue from where Session 2 left off — the next topic is discrete time models (Runge-Kutta refresher, then Allen-Cahn forward and KdV inverse). Start numbering responses from R86. Use `$...$` and `$$...$$` for math. `\sqrt` doesn't render — use `\surd` instead. Follow `.cursor/instructions.md` for communication preferences. Never rush — stay with each concept until the learner is satisfied. Keep responses short, one chunk at a time. The paper PDF is at `read/pinn_pdf/1-s2.0-S0021999118307125-am.pdf`.
+> Read `.cursor/pinn-learning-plan.md` and `.cursor/rk-fundamentals-plan.md` for full context. Also read `.cursor/instructions.md` for communication preferences.
+>
+> Continue from where Session 3 left off. The learner has completed RK2 and is **ready for RK3**. Start numbering responses from **R126**.
+>
+> Key rules:
+> 1. **Start every response with a tag** like R126, R127, etc.
+> 2. Use `$...$` for inline math and `$$...$$` for block math. `\sqrt` does NOT render — use `\surd` instead.
+> 3. When introducing math quantities (like k1, k2, k3), always follow each formula with a **plain-English one-liner** explaining what it physically means. Example: k1 = "how much u would change using the starting slope for a full step".
+> 4. Never rush the learner. Stay with each concept as long as needed. One small chunk per response.
+> 5. Keep responses brief. Ask before continuing to the next topic.
+> 6. No comments in code. Descriptive variable names. Readability over cleverness.
+> 7. Follow the RK learning path: RK3 → RK4 → General RK / Butcher tableau → Explicit vs Implicit → PINN paper's use of implicit RK → Allen-Cahn (discrete forward) → KdV (discrete inverse).
+> 8. The paper PDF is at `read/pinn_pdf/1-s2.0-S0021999118307125-am.pdf`.
+> 9. Previous demos are in `demos/` — reuse the same ODE from `r120_rk2_visualize.py` for consistency when building RK3/RK4 visuals.
+> 10. The learner prefers Boss or Ostad. Address him respectfully.
