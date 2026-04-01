@@ -1,8 +1,8 @@
 # Fundamentals → Runge-Kutta Learning Path
 
-## Current state: FUNDAMENTAL_STATE
+## Current state: COMPLETED
 
-We are building up from basics. No concept is assumed known unless explicitly covered.
+All RK fundamentals covered. Discrete time PINN models (Allen-Cahn, KdV) completed.
 
 ## Path to ENTER_RK
 
@@ -18,13 +18,13 @@ We are building up from basics. No concept is assumed known unless explicitly co
 7. [x] The RK idea: achieve Taylor-level accuracy using only F evaluations at clever points (R112, R114)
 8. [x] RK1 (Euler) — one slope, first-order (R114)
 9. [x] RK2 — two slopes, second-order, derive the weights (R115–R123, plot R120)
-10. [ ] RK3 — three slopes, third-order ← RESUME HERE
-11. [ ] RK4 — four slopes, the classic method
-12. [ ] General RK: q stages, Butcher tableau
+10. [x] RK3 — three slopes, third-order (R127–R128)
+11. [x] RK4 — four slopes, the classic method (R129–R130)
+12. [x] General RK: q stages, Butcher tableau (R131–R135)
 
 ## After ENTER_RK
 
-13. [ ] Explicit vs Implicit RK — what's the difference
-14. [ ] Why implicit matters (stability for stiff problems)
-15. [ ] How PINN paper uses implicit RK with hundreds of stages
-16. [ ] Back to the paper: Allen-Cahn (discrete forward) and KdV (discrete inverse)
+13. [x] Explicit vs Implicit RK — what's the difference (R135)
+14. [x] Why implicit matters (stability for stiff problems) (R135)
+15. [x] How PINN paper uses implicit RK with hundreds of stages (R136)
+16. [x] Back to the paper: Allen-Cahn (discrete forward) and KdV (discrete inverse) (R138–R213)
