@@ -105,22 +105,16 @@ Each topic below should be explored one at a time, with intuitive explanations a
   - Architecture diagram: demos/r78_navier_stokes_architecture.py
   - Collocation points explained: points where PDE residual is checked (R78)
 
-### Remaining topics:
-- [ ] Discrete time models — Runge-Kutta refresher, then Allen-Cahn (forward) and KdV (inverse)
-- [ ] Autograd mechanics — how differentiating w.r.t. inputs differs from w.r.t. weights
-- [ ] Physics loss as regularization — why small data works, connection to Bayesian priors
-- [ ] Practical details — L-BFGS, Latin Hypercube sampling, network sizing, sensitivity studies
-- [ ] Hands-on capstone — build a complete PINN from scratch for one problem
-
 ### Communication conventions:
 - Every response is tagged R1, R2, R3... so learner can refer back
-- Last response was R125 (Session 3 ended here)
+- Last response was R213 (Session 4 ended here)
 - Use $...$ and $$...$$ for math (NOT \\( \\) — those don't render in Cursor)
 - \\sqrt does NOT render in Cursor — use \\surd instead
 - Use Unicode Σ, ², ᵢ etc. as fallback if LaTeX fails
 - Never rush the learner — stay with a concept as long as needed
 - Keep responses short — one chunk at a time, ask before continuing
 - When introducing math quantities (like k1, k2), always follow the formula with a plain-English one-liner explaining what it physically means
+- **CRITICAL**: Never introduce new symbols without immediately saying what they mean in plain English. Always qualify "predicted" — say "network-guessed u" vs "RK-predicted u_n". The learner gets very frustrated by unexplained notation.
 
 ## Coding Standards
 
@@ -146,16 +140,64 @@ Each topic below should be explored one at a time, with intuitive explanations a
   - Visualization: demos/r94_taylor_buildup.py — linear approximation and error
   - Visualization: demos/r95_taylor_second_order.py — 1st vs 2nd order Taylor comparison
 
-### Remaining Runge-Kutta path (see `.cursor/rk-fundamentals-plan.md` for full tracker):
-- [ ] RK3 — three slopes, third-order ← **RESUME HERE**
-- [ ] RK4 — four slopes, the classic method
-- [ ] General RK: q stages, Butcher tableau
-- [ ] Explicit vs Implicit RK — what's the difference
-- [ ] Why implicit matters (stability for stiff problems)
-- [ ] How PINN paper uses implicit RK with hundreds of stages
-- [ ] Back to paper: Allen-Cahn (discrete forward) and KdV (discrete inverse)
+## Session 4 Progress (R126–R213)
 
-### Remaining topics (after RK path):
+### What was covered:
+- [x] RK3 — three slopes, third-order (R127–R128)
+  - k3's strange starting position u_n - k1 + 2k2 explained: algebra forces a=-1, b=2 to match Taylor (R128)
+  - "Undo naive start-slope, double-down on midpoint information"
+- [x] RK4 — the classic four-slope method (R129–R130)
+  - Weights 1/6, 2/6, 2/6, 1/6 (Simpson's pattern)
+  - Two midpoint samples (k2 and k3) — midpoint has most curvature info
+  - RK4 has enough stages that each can do simpler jumps (no weird coefficients)
+- [x] RK-N are independent families, not extensions of each other (R131–R132)
+  - Practical sweet spot: order 4–5 (ode45)
+  - Beyond order 8, cost outweighs benefit
+- [x] q (stages) vs N (order) distinction — q can be much larger than order (R133–R134)
+- [x] Butcher tableau — unified notation for all RK methods (R135)
+  - Explicit: lower triangular A matrix
+  - Implicit: full A matrix — creates chicken-and-egg coupling
+- [x] Explicit vs Implicit RK (R135)
+  - Explicit: forward sweep, O(q) F-evaluations
+  - Implicit: solve coupled system, O(q³d³) per Newton iteration — polynomial, not exponential
+- [x] PINN paper's implicit RK trick (R136)
+  - Neural network OUTPUTS the stage values directly — no system to solve
+  - Cost of more stages = just more output neurons (practically free)
+  - Enables q=100 or q=500 — unprecedented in classical methods
+- [x] Allen-Cahn equation deep-dive (R138–R203)
+  - Phase separation: u→+1 (phase A) or u→-1 (phase B) (R138–R143)
+  - Reaction term 5u³-5u pushes toward ±1, tiny diffusion smooths boundaries (R139)
+  - Visualizations: r138_allen_cahn_visualize.py, r139_allen_cahn_reaction.py, r142_allen_cahn_evolution.py, r143_allen_cahn_animation.py
+  - Why discrete not continuous: sharp transitions need dense collocation points, discrete avoids this (R144–R146)
+  - Full architecture walkthrough with q=2 toy example (R147–R203)
+    - Named layers: Input → Hidden NN → û Layer → Slope Layer → RK Layer → Loss Layer
+    - û Layer: network-guessed u at future times (no ground truth to compare)
+    - Slope Layer: u_t from the PDE (purple boxes in diagram)
+    - RK Layer: RK-predicted u_n — subtract RK-blended slopes from guesses to get implied starting value (blue boxes)
+    - Loss: compare RK-predicted u_n against actual known u_n at t=0.1
+    - Key insight from learner: "build the computation graph so ground truth is at the end" (R196)
+    - Boundary loss: periodic BCs — left edge = right edge in value and slope
+  - Architecture diagrams: r150_allen_cahn_architecture.py, r152_allen_cahn_simple.py, r157_allen_cahn_clear.py, r167_allen_cahn_final.py
+  - Concrete layer-by-layer walkthrough with 3 samples (R181–R203)
+    - Symbols: û_i^j (network guess, stage i, sample j), s_i^j (slope), p_i^j (RK-predicted u_n)
+  - Forward has q+1 outputs (need to predict u_{n+1}), inverse has q outputs (both ends have data)
+- [x] KdV equation deep-dive (R206–R212)
+  - Shallow water waves: u = water surface height (R206–R207)
+  - Two competing terms: nonlinear steepening vs dispersion
+  - Inverse problem: discover λ₁ and λ₂ from two data snapshots
+  - Architecture: same as Allen-Cahn but (1) two snapshots, (2) λ₁, λ₂ are trainable nn.Parameters
+  - RK Layer produces two sets: RK-predicted u_n (matches t=0.2 data) and RK-predicted u_{n+1} (matches t=0.8 data)
+  - Both use same network-guessed stages — stages are the bridge connecting the two timestamps (R212)
+  - Concrete layer-by-layer walkthrough with 3 samples (R210)
+  - Architecture diagram: r208_kdv_architecture.py
+
+### Lessons learned about communication:
+- NEVER introduce new symbols (like r, N, f) without immediately defining them in plain English
+- Always qualify "predicted": "network-guessed u" vs "RK-predicted u_n"
+- When the learner is confused, make things simpler, not longer
+- The learner's own verbalization is often the best summary — adopt it
+
+### Remaining topics:
 - [ ] Autograd mechanics — how differentiating w.r.t. inputs differs from w.r.t. weights
 - [ ] Physics loss as regularization — why small data works, connection to Bayesian priors
 - [ ] Practical details — L-BFGS, Latin Hypercube sampling, network sizing, sensitivity studies
@@ -167,16 +209,17 @@ Tell the next agent:
 
 > Read `.cursor/pinn-learning-plan.md` and `.cursor/rk-fundamentals-plan.md` for full context. Also read `.cursor/instructions.md` for communication preferences.
 >
-> Continue from where Session 3 left off. The learner has completed RK2 and is **ready for RK3**. Start numbering responses from **R126**.
+> Continue from where Session 4 left off. The learner has completed all four paper quadrants (Schrödinger, Navier-Stokes, Allen-Cahn, KdV) and the full RK path. Ready for **remaining topics**: autograd mechanics, physics-as-regularization, practical details, or hands-on capstone. Start numbering responses from **R214**.
 >
 > Key rules:
-> 1. **Start every response with a tag** like R126, R127, etc.
+> 1. **Start every response with a tag** like R214, R215, etc.
 > 2. Use `$...$` for inline math and `$$...$$` for block math. `\sqrt` does NOT render — use `\surd` instead.
-> 3. When introducing math quantities (like k1, k2, k3), always follow each formula with a **plain-English one-liner** explaining what it physically means. Example: k1 = "how much u would change using the starting slope for a full step".
-> 4. Never rush the learner. Stay with each concept as long as needed. One small chunk per response.
-> 5. Keep responses brief. Ask before continuing to the next topic.
-> 6. No comments in code. Descriptive variable names. Readability over cleverness.
-> 7. Follow the RK learning path: RK3 → RK4 → General RK / Butcher tableau → Explicit vs Implicit → PINN paper's use of implicit RK → Allen-Cahn (discrete forward) → KdV (discrete inverse).
+> 3. When introducing math quantities, always follow each formula with a **plain-English one-liner** explaining what it physically means.
+> 4. **NEVER introduce new symbols without immediately saying what they mean.** The learner gets very frustrated by unexplained notation. Always qualify "predicted" — say "network-guessed u" vs "RK-predicted u_n".
+> 5. Never rush the learner. Stay with each concept as long as needed. One small chunk per response.
+> 6. Keep responses brief. Ask before continuing to the next topic.
+> 7. No comments in code. Descriptive variable names. Readability over cleverness.
 > 8. The paper PDF is at `read/pinn_pdf/1-s2.0-S0021999118307125-am.pdf`.
-> 9. Previous demos are in `demos/` — reuse the same ODE from `r120_rk2_visualize.py` for consistency when building RK3/RK4 visuals.
+> 9. Previous demos are in `demos/`.
 > 10. The learner prefers Boss or Ostad. Address him respectfully.
+> 11. When the learner is confused, make things **simpler**, not longer. Short sentences. Concrete examples.
