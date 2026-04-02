@@ -6,11 +6,7 @@ This project is a structured tutoring session to deeply understand different sci
 
 
 ## Learner Profile
-
-- Name: Arif (prefers Boss or Ostad)
-- PhD in ML (hyperspectral remote sensing, band selection, dimensionality reduction)
-- 16–18 years software engineering (Java, Python, etc.)
-- Strong Python, applied ML, GIS, remote sensing
+- Call me Arif, Boss, or Ostad
 - Needs gut-level intuitive understanding, not surface-level
 - Prefers hierarchical learning: high-level overview first, then BFS exploration
 - Learns well from small code demos where applicable
