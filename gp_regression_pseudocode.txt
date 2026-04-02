@@ -2,7 +2,7 @@ GP REGRESSION — STEP BY STEP AT THE PROGRAMMING LEVEL
 ======================================================
 
 Using our spectral example: 3 observed wavelengths → predict reflectance at 200 wavelengths.
-
+hey,
 
 INPUTS:
   X_train  = [400, 500, 600]           -- 3 observed wavelengths

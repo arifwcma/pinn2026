@@ -1,0 +1,156 @@
+GP REGRESSION — FULLY WORKED EXAMPLE WITH ACTUAL NUMBERS
+==========================================================
+
+SETUP
+-----
+One soil sample. We measured reflectance at 2 wavelengths.
+We want to predict reflectance at 3 new wavelengths.
+
+  Observed (training data):
+    X_train = [400, 600]        (nm)
+    y_train = [0.10, 0.30]      (reflectance)
+
+  Want to predict at:
+    X_pred  = [450, 500, 550]   (nm)
+
+  Kernel: RBF with length_scale = 100
+    k(x, x') = exp( -0.5 * ((x - x') / 100)^2 )
+
+
+==========================================================
+STEP 1: Build K_train_train (2×2)
+==========================================================
+"How do the 2 observed wavelengths relate to each other?"
+
+  k(400, 400) = exp(-0.5 * ((400-400)/100)^2) = exp(0)    = 1.0000
+  k(400, 600) = exp(-0.5 * ((400-600)/100)^2) = exp(-2.0) = 0.1353
+  k(600, 400) = same as above by symmetry                  = 0.1353
+  k(600, 600) = exp(-0.5 * ((600-600)/100)^2) = exp(0)    = 1.0000
+
+  K_train_train = | 1.0000  0.1353 |
+                  | 0.1353  1.0000 |
+
+  Reading this: 400nm and 600nm are 200nm apart, so their
+  correlation is only 0.1353 — they don't know much about each other.
+
+
+==========================================================
+STEP 2: Build K_pred_train (3×2)
+==========================================================
+"How does each prediction wavelength relate to each observed wavelength?"
+
+  k(450, 400) = exp(-0.5 * (50/100)^2)  = exp(-0.125) = 0.8825   ← 450 is close to 400, high similarity
+  k(450, 600) = exp(-0.5 * (150/100)^2) = exp(-1.125) = 0.3247   ← 450 is far from 600, low similarity
+
+  k(500, 400) = exp(-0.5 * (100/100)^2) = exp(-0.500) = 0.6065   ← 500 is medium distance from 400
+  k(500, 600) = exp(-0.5 * (100/100)^2) = exp(-0.500) = 0.6065   ← 500 is equally far from 600
+
+  k(550, 400) = exp(-0.5 * (150/100)^2) = exp(-1.125) = 0.3247   ← 550 is far from 400
+  k(550, 600) = exp(-0.5 * (50/100)^2)  = exp(-0.125) = 0.8825   ← 550 is close to 600, high similarity
+
+  K_pred_train = | 0.8825  0.3247 |    ← 450nm: mostly listens to 400nm
+                 | 0.6065  0.6065 |    ← 500nm: listens equally to both
+                 | 0.3247  0.8825 |    ← 550nm: mostly listens to 600nm
+
+
+==========================================================
+STEP 3: Build K_pred_pred (3×3)
+==========================================================
+"How do the prediction wavelengths relate to each other?"
+(Needed for computing uncertainty)
+
+  k(450, 450) = 1.0000    k(450, 500) = 0.8825    k(450, 550) = 0.6065
+  k(500, 450) = 0.8825    k(500, 500) = 1.0000    k(500, 550) = 0.8825
+  k(550, 450) = 0.6065    k(550, 500) = 0.8825    k(550, 550) = 1.0000
+
+  K_pred_pred = | 1.0000  0.8825  0.6065 |
+                | 0.8825  1.0000  0.8825 |
+                | 0.6065  0.8825  1.0000 |
+
+
+==========================================================
+STEP 4: Invert K_train_train
+==========================================================
+For a 2×2 matrix [[a, b], [c, d]], inverse = (1/det) * [[d, -b], [-c, a]]
+
+  det = 1.0 * 1.0 - 0.1353 * 0.1353 = 1 - 0.0183 = 0.9817
+
+  K_inv = (1/0.9817) * | 1.0000  -0.1353 |   =   | 1.0186  -0.1378 |
+                        | -0.1353  1.0000 |       | -0.1378  1.0186 |
+
+
+==========================================================
+STEP 5: Compute posterior mean (THE PREDICTION)
+==========================================================
+Formula: posterior_mean = K_pred_train @ K_inv @ y_train
+
+  Sub-step A: alpha = K_inv @ y_train   (2×2 @ 2×1 = 2×1)
+
+    alpha[0] = 1.0186 * 0.10 + (-0.1378) * 0.30 = 0.1019 - 0.0414 = 0.0605
+    alpha[1] = (-0.1378) * 0.10 + 1.0186 * 0.30 = -0.0138 + 0.3056 = 0.2918
+
+    alpha = | 0.0605 |    ← "weight" contributed by the 400nm observation
+            | 0.2918 |    ← "weight" contributed by the 600nm observation
+
+  Sub-step B: posterior_mean = K_pred_train @ alpha   (3×2 @ 2×1 = 3×1)
+
+    At 450nm: 0.8825 * 0.0605 + 0.3247 * 0.2918 = 0.0534 + 0.0948 = 0.1482
+    At 500nm: 0.6065 * 0.0605 + 0.6065 * 0.2918 = 0.0367 + 0.1770 = 0.2137
+    At 550nm: 0.3247 * 0.0605 + 0.8825 * 0.2918 = 0.0197 + 0.2575 = 0.2772
+
+    posterior_mean = | 0.1482 |    ← 450nm: closer to 400nm's value (0.10), pulled low
+                     | 0.2137 |    ← 500nm: right between the two observations
+                     | 0.2772 |    ← 550nm: closer to 600nm's value (0.30), pulled high
+
+  THIS MAKES INTUITIVE SENSE:
+  - 450nm is near 400nm (reflectance 0.10), so prediction is low (0.15)
+  - 550nm is near 600nm (reflectance 0.30), so prediction is high (0.28)
+  - 500nm is equidistant from both, so prediction is in the middle (0.21)
+
+
+==========================================================
+STEP 6: Compute posterior covariance (THE UNCERTAINTY)
+==========================================================
+Formula: posterior_cov = K_pred_pred - K_pred_train @ K_inv @ K_pred_train^T
+
+  The subtraction means: "start with the prior uncertainty (K_pred_pred),
+  then subtract what we learned from the data."
+
+  After the full matrix math:
+
+  posterior_cov = | 0.1783  0.2374  0.1445 |
+                  | 0.2376  0.3520  0.2376 |
+                  | 0.1445  0.2374  0.1783 |
+
+  The diagonal gives variance at each prediction point:
+
+    At 450nm: variance = 0.1783 → std = 0.4222
+    At 500nm: variance = 0.3520 → std = 0.5933
+    At 550nm: variance = 0.1783 → std = 0.4222
+
+  THIS ALSO MAKES INTUITIVE SENSE:
+  - 450nm and 550nm have LESS uncertainty (std=0.42)
+    because each is close to an observed point
+  - 500nm has MORE uncertainty (std=0.59)
+    because it's the farthest from both observations
+    — it's in the middle of the gap
+
+
+==========================================================
+FINAL ANSWER
+==========================================================
+
+  Wavelength    Predicted Reflectance    Uncertainty (±2σ)
+  ---------     ---------------------    -----------------
+  450 nm        0.1482                   ± 0.8444
+  500 nm        0.2137                   ± 1.1866
+  550 nm        0.2772                   ± 0.8444
+
+  (±2σ gives the 95% confidence interval)
+
+  We observed:
+    400 nm → 0.10
+    600 nm → 0.30
+
+  The GP smoothly interpolated between them, with honest
+  uncertainty that is smallest near data and largest in the gap.
