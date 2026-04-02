@@ -1,0 +1,62 @@
+GP REGRESSION — STEP BY STEP AT THE PROGRAMMING LEVEL
+======================================================
+
+Using our spectral example: 3 observed wavelengths → predict reflectance at 200 wavelengths.
+
+
+INPUTS:
+  X_train  = [400, 500, 600]           -- 3 observed wavelengths
+  y_train  = [0.12, 0.35, 0.22]        -- reflectance at those wavelengths
+  X_pred   = [350, 351, 352, ..., 650] -- 200 wavelengths where we want predictions
+
+
+STEP 1: Build covariance matrices using the kernel
+
+  K_train_train = kernel(X_train, X_train)   -- 3×3 matrix: how observed points relate to each other
+  K_pred_train  = kernel(X_pred,  X_train)   -- 200×3 matrix: how each prediction point relates to each observed point
+  K_pred_pred   = kernel(X_pred,  X_pred)    -- 200×200 matrix: how prediction points relate to each other
+
+
+STEP 2: Add tiny noise to K_train_train diagonal (for numerical stability)
+
+  K_train_train = K_train_train + 1e-6 * I
+
+
+STEP 3: Invert K_train_train
+
+  K_inv = inverse(K_train_train)             -- 3×3 matrix
+
+
+STEP 4: Compute posterior mean (the prediction)
+
+  posterior_mean = K_pred_train @ K_inv @ y_train
+                   -- 200×3 @ 3×3 @ 3×1 = 200×1
+                   -- "best guess reflectance at each of the 200 wavelengths"
+
+
+STEP 5: Compute posterior covariance (the uncertainty)
+
+  posterior_cov = K_pred_pred - K_pred_train @ K_inv @ K_pred_train^T
+                  -- 200×200 - 200×3 @ 3×3 @ 3×200 = 200×200
+                  -- "how uncertain am I at each wavelength, and how are those uncertainties correlated"
+
+
+STEP 6: Extract what you need
+
+  predicted_values = posterior_mean                    -- the blue line in the middle plot
+  uncertainty      = sqrt(diagonal(posterior_cov))     -- the blue band width
+  random_curves    = sample from N(posterior_mean, posterior_cov)  -- the right plot
+
+
+======================================================
+KEY OBSERVATIONS
+======================================================
+
+1. No training loop, no epochs, no gradient descent.
+   Steps 1-6 are pure linear algebra — matrix multiplications and one matrix inversion.
+   The entire "learning" happens in the matrix inversion of K_train_train.
+
+2. Where each earlier concept lives:
+   - Steps 1-3 = building the multivariate Gaussian (Step 2 of our roadmap)
+   - Steps 4-5 = conditioning (Step 3 of our roadmap)
+   - The kernel in Step 1 = Step 5 of our roadmap
