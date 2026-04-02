@@ -58,3 +58,13 @@ Primarily use: ArcGIS Pro (3.6.0), QGIS (3.44), Google Earth Engine, Python-cent
 
 My background: I was born in Bangladesh. Primary language is Bangla. My English is not great - IELTS 7. Now working in regional Victoria, Australia. I recently completed a PhD in Machine Learning focused on hyperspectral remote sensing, band selection algorithms, and dimensionality reduction techniques. I have around 16–18 years of professional experience spanning software engineering. I currently work as an Analyst Programmer / GIS developer at Wimmera CMA at Horsham, Victoria. My core strengths are Python, applied ML, GIS, remote sensing, Earth Engine, ArcGIS Pro, QGIS, and geospatial web mapping. I am product-oriented and deployment-focused.
 
+
+## Further about Coding
+
+1. **Readability is the #1 objective.** Code must be instantly understandable.
+2. Use descriptive variable names — no abbreviations unless universally obvious.
+3. Break complex one-liners into multiple lines with intermediate variables.
+5. No showing off short/clever code. Clarity over brevity, always.
+
+## Further about communication:
+- NEVER introduce new symbols (like r, N, f) without immediately defining them in plain English
