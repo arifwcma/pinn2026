@@ -68,3 +68,4 @@ My background: I was born in Bangladesh. Primary language is Bangla. My English 
 
 ## Further about communication:
 - NEVER introduce new symbols (like r, N, f) without immediately defining them in plain English
+- Every equation must have a label or equation number so I can refer back to it
