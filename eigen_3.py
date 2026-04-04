@@ -29,9 +29,8 @@ print(f"Eigenvector 1: {eigenvectors[:, 0]}")
 print(f"\nEigenvalue 2: {eigenvalues[1]:.4f}")
 print(f"Eigenvector 2: {eigenvectors[:, 1]}")
 
-fig, axes = plt.subplots(1, 2, figsize=(16, 7))
+fig, ax = plt.subplots(figsize=(8, 8))
 
-ax = axes[0]
 ax.scatter(data[:, 0], data[:, 1], s=100, color='black', zorder=5)
 ax.annotate(f'Sample 1 ({sample_1[0]},{sample_1[1]})', xy=sample_1,
             xytext=(sample_1[0]-1.2, sample_1[1]+0.3), fontsize=10)
@@ -61,29 +60,26 @@ ax.set_title('Samples + Eigenvectors')
 ax.set_aspect('equal')
 ax.grid(True, alpha=0.3)
 
-margin = 2
-all_points = np.array([sample_1, sample_2, mean])
-ax.set_xlim(all_points[:, 0].min() - margin, all_points[:, 0].max() + margin)
-ax.set_ylim(all_points[:, 1].min() - margin, all_points[:, 1].max() + margin)
-
-ax2 = axes[1]
 var_band1 = covariance_matrix[0, 0]
 var_band2 = covariance_matrix[1, 1]
 cov_12 = covariance_matrix[0, 1]
 
-bar_positions = [0, 1, 2]
-bar_values = [var_band1, var_band2, cov_12]
-bar_labels = [f'Var(Band1)\n{var_band1:.2f}',
-              f'Var(Band2)\n{var_band2:.2f}',
-              f'Cov(B1,B2)\n{cov_12:.2f}']
-bar_colors = ['orange', 'purple', 'teal']
+cov_points = {
+    f'Var(B1) = ({var_band1:.1f}, 0)': (var_band1, 0),
+    f'Var(B2) = (0, {var_band2:.1f})': (0, var_band2),
+    f'Cov(B1,B2) = ({cov_12:.1f}, {cov_12:.1f})': (cov_12, cov_12),
+}
+cov_colors = ['orange', 'purple', 'teal']
+for (label, point), color in zip(cov_points.items(), cov_colors):
+    ax.scatter(*point, s=150, color=color, marker='D', zorder=6, edgecolors='black')
+    ax.annotate(label, xy=point, xytext=(point[0]+0.2, point[1]-0.4),
+                fontsize=9, color=color, fontweight='bold')
 
-ax2.bar(bar_positions, bar_values, color=bar_colors, width=0.5)
-ax2.set_xticks(bar_positions)
-ax2.set_xticklabels(bar_labels, fontsize=11)
-ax2.set_ylabel('Value')
-ax2.set_title('Covariance Matrix Entries')
-ax2.grid(True, alpha=0.3, axis='y')
+margin = 1
+all_coords = np.array([sample_1, sample_2, mean,
+                        [var_band1, 0], [0, var_band2], [cov_12, cov_12]])
+ax.set_xlim(-0.5, all_coords[:, 0].max() + margin)
+ax.set_ylim(-0.5, all_coords[:, 1].max() + margin)
 
 plt.tight_layout()
 plt.show()
