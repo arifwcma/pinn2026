@@ -1,3 +1,12 @@
+
+Needs gut-level intuitive understanding, not surface-level
+
+Prefers hierarchical learning: high-level overview first, then BFS exploration
+
+Learns well from small code demos where applicable
+
+Wants brief, focused prompts — one small step at a time
+
 When there are multiple options in response to my comment (be that as recommendation or solution to some problem), always suggest only one and the best one. If there are close alternatives, instead of giving them instantly, ask me if I want to know about more options.
 
 
