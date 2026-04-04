@@ -1,0 +1,416 @@
+latex_content = r"""
+\documentclass[11pt, a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\setlength{\headheight}{14pt}
+
+\definecolor{secblue}{RGB}{26, 71, 111}
+\definecolor{notegreen}{RGB}{40, 120, 60}
+\definecolor{explgray}{RGB}{100, 100, 100}
+\definecolor{lightblue}{RGB}{230, 242, 255}
+\definecolor{lightyellow}{RGB}{255, 250, 230}
+
+\newcommand{\gut}[1]{\begin{tcolorbox}[colback=lightyellow, colframe=orange!50, title=Gut feeling]#1\end{tcolorbox}}
+\newcommand{\recap}[1]{\begin{tcolorbox}[colback=lightblue, colframe=secblue!50, title=Recap]#1\end{tcolorbox}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textit{OLS Proof \& Worked Example}}
+\lhead{\textit{Arif's GP Study}}
+\cfoot{\thepage}
+
+\title{\color{secblue}\textbf{Ordinary Least Squares}\\[0.3em]
+\Large Proof of $\mathbf{w} = (X^\top X)^{-1} X^\top \mathbf{y}$ and Full Numerical Example}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+
+% ============================================================
+\section*{\color{secblue}Part 1: The Setup}
+
+We have $n$ data points. Each data point has an input $x_i$ and an output $y_i$.
+We want to fit a line:
+
+\begin{equation}
+\hat{y}_i = w_0 + w_1 \, x_i
+\tag{OLS-1}
+\end{equation}
+
+\begin{center}
+\begin{tabular}{cl}
+\toprule
+\textbf{Symbol} & \textbf{Plain English} \\
+\midrule
+$\hat{y}_i$ & Our prediction for sample $i$ \\
+$y_i$ & The actual observed value for sample $i$ \\
+$w_0$ & The intercept (value when $x = 0$) \\
+$w_1$ & The slope (how much $y$ changes per unit of $x$) \\
+$x_i$ & The input feature of sample $i$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+In matrix form, we stack all $n$ predictions into one equation:
+
+\begin{equation}
+\hat{\mathbf{y}} = X \, \mathbf{w}
+\tag{OLS-2}
+\end{equation}
+
+where:
+
+\begin{equation}
+X = \begin{pmatrix} 1 & x_1 \\ 1 & x_2 \\ \vdots & \vdots \\ 1 & x_n \end{pmatrix}
+\quad
+\mathbf{w} = \begin{pmatrix} w_0 \\ w_1 \end{pmatrix}
+\quad
+\hat{\mathbf{y}} = \begin{pmatrix} w_0 + w_1 x_1 \\ w_0 + w_1 x_2 \\ \vdots \\ w_0 + w_1 x_n \end{pmatrix}
+\tag{OLS-3}
+\end{equation}
+
+\gut{
+The column of ones in $X$ is a trick. When you multiply a row $[1, \; x_i]$ by $[w_0, \; w_1]^\top$, you get $1 \cdot w_0 + x_i \cdot w_1 = w_0 + w_1 x_i$. That's how the intercept sneaks into the matrix form.
+}
+
+
+% ============================================================
+\section*{\color{secblue}Part 2: The Goal --- Minimize Squared Errors}
+
+The \textbf{residual} for sample $i$ is how wrong our prediction is:
+
+\begin{equation}
+r_i = y_i - \hat{y}_i = y_i - (w_0 + w_1 x_i)
+\tag{OLS-4}
+\end{equation}
+
+We want to minimize the \textbf{sum of squared residuals}:
+
+\begin{equation}
+L(\mathbf{w}) = \sum_{i=1}^{n} r_i^2 = \sum_{i=1}^{n} (y_i - \hat{y}_i)^2
+\tag{OLS-5}
+\end{equation}
+
+\begin{center}
+$L$ = ``loss function'' --- the thing we want to make as small as possible.
+\end{center}
+
+In matrix form, the vector of all residuals is:
+
+\begin{equation}
+\mathbf{r} = \mathbf{y} - X\mathbf{w}
+\tag{OLS-6}
+\end{equation}
+
+And the sum of squared residuals is:
+
+\begin{equation}
+L(\mathbf{w}) = \mathbf{r}^\top \mathbf{r} = (\mathbf{y} - X\mathbf{w})^\top (\mathbf{y} - X\mathbf{w})
+\tag{OLS-7}
+\end{equation}
+
+\gut{
+$\mathbf{r}^\top \mathbf{r}$ is just the dot product of the residual vector with itself, which equals $r_1^2 + r_2^2 + \cdots + r_n^2$. It's a single number that measures total error.
+}
+
+
+% ============================================================
+\section*{\color{secblue}Part 3: Expanding the Loss Function}
+
+Let's expand Eq.~OLS-7 step by step. Using the rule $(A - B)^\top = A^\top - B^\top$:
+
+\begin{equation}
+L = (\mathbf{y}^\top - \mathbf{w}^\top X^\top)(\mathbf{y} - X\mathbf{w})
+\tag{OLS-8}
+\end{equation}
+
+Multiply out (just like $(a - b)(c - d) = ac - ad - bc + bd$):
+
+\begin{align}
+L &= \mathbf{y}^\top \mathbf{y} \;-\; \mathbf{y}^\top X\mathbf{w} \;-\; \mathbf{w}^\top X^\top \mathbf{y} \;+\; \mathbf{w}^\top X^\top X \mathbf{w}
+\tag{OLS-9}
+\end{align}
+
+\begin{center}
+\begin{tabular}{cl}
+\toprule
+\textbf{Term} & \textbf{Plain English} \\
+\midrule
+$\mathbf{y}^\top \mathbf{y}$ & Total energy in the data (a constant, doesn't depend on $\mathbf{w}$) \\
+$\mathbf{y}^\top X\mathbf{w}$ & How well our prediction aligns with the data \\
+$\mathbf{w}^\top X^\top \mathbf{y}$ & Same as above (it's a scalar, so it equals its own transpose) \\
+$\mathbf{w}^\top X^\top X \mathbf{w}$ & Total energy in our predictions \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Since $\mathbf{y}^\top X \mathbf{w}$ is a scalar (a $1\times 1$ matrix), it equals its transpose: $\mathbf{w}^\top X^\top \mathbf{y}$. So the two middle terms are identical, and we can simplify:
+
+\begin{equation}
+L = \mathbf{y}^\top \mathbf{y} \;-\; 2\,\mathbf{w}^\top X^\top \mathbf{y} \;+\; \mathbf{w}^\top X^\top X \,\mathbf{w}
+\tag{OLS-10}
+\end{equation}
+
+
+% ============================================================
+\section*{\color{secblue}Part 4: Taking the Derivative and Setting It to Zero}
+
+To find the minimum, we take the derivative of $L$ with respect to $\mathbf{w}$ and set it to zero.
+
+\recap{
+Two matrix calculus rules we need (analogous to scalar rules):
+\begin{enumerate}
+\item $\dfrac{\partial}{\partial \mathbf{w}} (\mathbf{a}^\top \mathbf{w}) = \mathbf{a}$
+\hfill \textit{(like $\frac{d}{dx}(ax) = a$ in scalar calculus)}
+\item $\dfrac{\partial}{\partial \mathbf{w}} (\mathbf{w}^\top A \,\mathbf{w}) = 2A\mathbf{w}$
+\hfill \textit{(like $\frac{d}{dx}(ax^2) = 2ax$ in scalar calculus)}
+\end{enumerate}
+These are the matrix versions of the two most basic derivative rules you already know.
+}
+
+Apply these rules to each term of Eq.~OLS-10:
+
+\begin{align}
+\frac{\partial L}{\partial \mathbf{w}} &= 0 \;-\; 2\,X^\top \mathbf{y} \;+\; 2\,X^\top X\,\mathbf{w}
+\tag{OLS-11}
+\end{align}
+
+\begin{center}
+\begin{tabular}{cl}
+\toprule
+\textbf{Term in $L$} & \textbf{Its derivative w.r.t.\ $\mathbf{w}$} \\
+\midrule
+$\mathbf{y}^\top \mathbf{y}$ (constant) & $0$ \\
+$-2\,\mathbf{w}^\top X^\top \mathbf{y}$ & $-2\,X^\top \mathbf{y}$ \quad (using rule 1 with $\mathbf{a} = X^\top \mathbf{y}$) \\
+$\mathbf{w}^\top X^\top X\, \mathbf{w}$ & $2\,X^\top X\,\mathbf{w}$ \quad (using rule 2 with $A = X^\top X$) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Set the derivative to zero:
+
+\begin{equation}
+-2\,X^\top \mathbf{y} + 2\,X^\top X\,\mathbf{w} = 0
+\tag{OLS-12}
+\end{equation}
+
+Divide both sides by 2:
+
+\begin{equation}
+X^\top X\,\mathbf{w} = X^\top \mathbf{y}
+\tag{OLS-13}
+\end{equation}
+
+\gut{
+Eq.~OLS-13 is called the \textbf{normal equation}. It says: ``the optimal weights are the ones where $X^\top X \,\mathbf{w}$ exactly equals $X^\top \mathbf{y}$.'' This is a system of linear equations --- the matrix equivalent of $ax = b$.
+}
+
+Multiply both sides by $(X^\top X)^{-1}$ on the left:
+
+\begin{equation}
+\boxed{\mathbf{w} = (X^\top X)^{-1} \, X^\top \mathbf{y}}
+\tag{OLS-14}
+\end{equation}
+
+That's it. This is the proof. $\square$
+
+\gut{
+Compare with scalar algebra: if $ax = b$, then $x = a^{-1}b = b/a$. Here, $X^\top X$ plays the role of $a$, $X^\top \mathbf{y}$ plays the role of $b$, and $\mathbf{w}$ plays the role of $x$. We ``divide'' both sides by $X^\top X$ (i.e., multiply by its inverse).
+}
+
+
+% ============================================================
+% ============================================================
+\newpage
+\section*{\color{secblue}Part 5: Full Numerical Example with 2 Samples}
+
+\subsection*{The Data}
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Sample} & \textbf{Size (sqm)} & \textbf{Price (lakh)} \\
+\midrule
+1 & 30 & 76.2 \\
+2 & 80 & 201.7 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+\subsection*{Step 1: Build the Design Matrix $X$ and Target Vector $\mathbf{y}$}
+
+\begin{equation}
+X = \begin{pmatrix} 1 & 30 \\ 1 & 80 \end{pmatrix}
+\quad
+\mathbf{y} = \begin{pmatrix} 76.2 \\ 201.7 \end{pmatrix}
+\tag{N-1}
+\end{equation}
+
+$X$ is $2 \times 2$. First column is all ones (for the intercept). Second column is the house sizes.
+
+
+\subsection*{Step 2: Compute $X^\top$}
+
+\begin{equation}
+X^\top = \begin{pmatrix} 1 & 1 \\ 30 & 80 \end{pmatrix}
+\tag{N-2}
+\end{equation}
+
+Just swap rows and columns of $X$.
+
+
+\subsection*{Step 3: Compute $X^\top X$ \quad ($2\times 2 \;\cdot\; 2\times 2 = 2\times 2$)}
+
+\begin{equation}
+X^\top X = \begin{pmatrix} 1 & 1 \\ 30 & 80 \end{pmatrix}
+\begin{pmatrix} 1 & 30 \\ 1 & 80 \end{pmatrix}
+\tag{N-3}
+\end{equation}
+
+Element by element:
+
+\begin{align}
+(X^\top X)_{1,1} &= 1 \times 1 + 1 \times 1 = \mathbf{2} \tag{N-3a} \\
+(X^\top X)_{1,2} &= 1 \times 30 + 1 \times 80 = \mathbf{110} \tag{N-3b} \\
+(X^\top X)_{2,1} &= 30 \times 1 + 80 \times 1 = \mathbf{110} \tag{N-3c} \\
+(X^\top X)_{2,2} &= 30 \times 30 + 80 \times 80 = 900 + 6400 = \mathbf{7300} \tag{N-3d}
+\end{align}
+
+\begin{equation}
+X^\top X = \begin{pmatrix} 2 & 110 \\ 110 & 7300 \end{pmatrix}
+\tag{N-4}
+\end{equation}
+
+\gut{
+What do these numbers mean?
+\begin{itemize}
+\item $(X^\top X)_{1,1} = 2$ = number of samples (the ones column dotted with itself)
+\item $(X^\top X)_{1,2} = 110$ = sum of all $x$ values ($30 + 80$)
+\item $(X^\top X)_{2,2} = 7300$ = sum of squared $x$ values ($30^2 + 80^2$)
+\end{itemize}
+This matrix summarizes the ``geometry'' of your input data.
+}
+
+
+\subsection*{Step 4: Compute $X^\top \mathbf{y}$ \quad ($2\times 2 \;\cdot\; 2\times 1 = 2\times 1$)}
+
+\begin{equation}
+X^\top \mathbf{y} = \begin{pmatrix} 1 & 1 \\ 30 & 80 \end{pmatrix}
+\begin{pmatrix} 76.2 \\ 201.7 \end{pmatrix}
+\tag{N-5}
+\end{equation}
+
+\begin{align}
+(X^\top \mathbf{y})_1 &= 1 \times 76.2 + 1 \times 201.7 = \mathbf{277.9} \tag{N-5a} \\
+(X^\top \mathbf{y})_2 &= 30 \times 76.2 + 80 \times 201.7 = 2286 + 16136 = \mathbf{18422} \tag{N-5b}
+\end{align}
+
+\begin{equation}
+X^\top \mathbf{y} = \begin{pmatrix} 277.9 \\ 18422 \end{pmatrix}
+\tag{N-6}
+\end{equation}
+
+\gut{
+\begin{itemize}
+\item First entry = sum of all $y$ values ($76.2 + 201.7 = 277.9$)
+\item Second entry = sum of $x_i \cdot y_i$ ($30 \times 76.2 + 80 \times 201.7 = 18422$)
+\end{itemize}
+This vector summarizes how inputs and outputs relate.
+}
+
+
+\subsection*{Step 5: Invert $X^\top X$}
+
+Using our $2\times 2$ inverse formula (Eq.~11 from the matrix inverse derivation):
+
+\begin{equation}
+\det(X^\top X) = 2 \times 7300 - 110 \times 110 = 14600 - 12100 = 2500
+\tag{N-7}
+\end{equation}
+
+\begin{equation}
+(X^\top X)^{-1} = \frac{1}{2500} \begin{pmatrix} 7300 & -110 \\ -110 & 2 \end{pmatrix}
+= \begin{pmatrix} 2.92 & -0.044 \\ -0.044 & 0.0008 \end{pmatrix}
+\tag{N-8}
+\end{equation}
+
+
+\subsection*{Step 6: Compute $\mathbf{w} = (X^\top X)^{-1} \, X^\top \mathbf{y}$}
+
+\begin{equation}
+\mathbf{w} = \begin{pmatrix} 2.92 & -0.044 \\ -0.044 & 0.0008 \end{pmatrix}
+\begin{pmatrix} 277.9 \\ 18422 \end{pmatrix}
+\tag{N-9}
+\end{equation}
+
+\begin{align}
+w_0 &= 2.92 \times 277.9 + (-0.044) \times 18422 = 811.47 - 810.57 = \mathbf{0.90} \tag{N-9a} \\
+w_1 &= (-0.044) \times 277.9 + 0.0008 \times 18422 = -12.23 + 14.74 = \mathbf{2.51} \tag{N-9b}
+\end{align}
+
+\begin{equation}
+\boxed{\mathbf{w} = \begin{pmatrix} 0.90 \\ 2.51 \end{pmatrix}}
+\tag{N-10}
+\end{equation}
+
+So the fitted line is:
+
+\begin{equation}
+\hat{y} = 0.90 + 2.51 \, x
+\tag{N-11}
+\end{equation}
+
+$w_0 = 0.90$ = intercept (predicted price when size = 0).
+
+$w_1 = 2.51$ = slope (each extra sqm adds 2.51 lakh to the price).
+
+
+\subsection*{Step 7: Verify --- Do Predictions Match the Data?}
+
+With only 2 data points and 2 parameters ($w_0, w_1$), the line must pass \emph{exactly} through both points:
+
+\begin{align}
+\hat{y}_1 &= 0.90 + 2.51 \times 30 = 0.90 + 75.30 = 76.20 \;\; \checkmark \tag{N-12a} \\
+\hat{y}_2 &= 0.90 + 2.51 \times 80 = 0.90 + 200.80 = 201.70 \;\; \checkmark \tag{N-12b}
+\end{align}
+
+\gut{
+With 2 points and 2 unknowns, there is exactly one line through both points --- zero residual error. This is like solving 2 equations with 2 unknowns in high school algebra. It's only when you have more data points than parameters (overdetermined system) that you get nonzero residuals, and the formula finds the \emph{best compromise} line.
+}
+
+
+\subsection*{Summary}
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Step} & \textbf{Operation} & \textbf{Result} \\
+\midrule
+1 & Build $X$, $\mathbf{y}$ & $2\times2$ matrix, $2\times1$ vector \\
+2 & Transpose $X$ & $X^\top$ ($2\times2$) \\
+3 & $X^\top X$ & $\begin{pmatrix} 2 & 110 \\ 110 & 7300 \end{pmatrix}$ \\
+4 & $X^\top \mathbf{y}$ & $\begin{pmatrix} 277.9 \\ 18422 \end{pmatrix}$ \\
+5 & $(X^\top X)^{-1}$ & $\begin{pmatrix} 2.92 & -0.044 \\ -0.044 & 0.0008 \end{pmatrix}$ \\
+6 & $(X^\top X)^{-1} X^\top \mathbf{y}$ & $\begin{pmatrix} 0.90 \\ 2.51 \end{pmatrix}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\end{document}
+"""
+
+output_path = "ols_proof_and_example.tex"
+with open(output_path, "w") as f:
+    f.write(latex_content)
+
+print(f"Saved to {output_path}")

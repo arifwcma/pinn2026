@@ -1,0 +1,372 @@
+latex_content = r"""
+\documentclass[11pt, a4paper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{parskip}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\setlength{\headheight}{14pt}
+
+\definecolor{secblue}{RGB}{26, 71, 111}
+\definecolor{notegreen}{RGB}{40, 120, 60}
+\definecolor{explgray}{RGB}{100, 100, 100}
+\definecolor{lightblue}{RGB}{230, 242, 255}
+\definecolor{lightyellow}{RGB}{255, 250, 230}
+
+\newcommand{\gut}[1]{\begin{tcolorbox}[colback=lightyellow, colframe=orange!50, title=Gut feeling]#1\end{tcolorbox}}
+\newcommand{\recap}[1]{\begin{tcolorbox}[colback=lightblue, colframe=secblue!50, title=Recap]#1\end{tcolorbox}}
+
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{\textit{Step 6 — Posterior Covariance}}
+\lhead{\textit{Arif's GP Study}}
+\cfoot{\thepage}
+
+\title{\color{secblue}\textbf{Step 6: Posterior Covariance}\\[0.3em]
+\Large Every Matrix Multiplication with Actual Numbers}
+\author{}
+\date{}
+
+\begin{document}
+\maketitle
+\thispagestyle{fancy}
+
+% ============================================================
+\section*{\color{secblue}What Are We Computing?}
+
+\begin{equation}
+\Sigma_{\text{pred}} = K_{\text{pred,pred}} \;-\; K_{\text{pred,train}} \;\cdot\; K_{\text{train,train}}^{-1} \;\cdot\; K_{\text{pred,train}}^\top
+\tag{S6-1}
+\end{equation}
+
+\begin{center}
+\begin{tabular}{cl}
+\toprule
+\textbf{Symbol} & \textbf{Plain English} \\
+\midrule
+$\Sigma_{\text{pred}}$ & Our uncertainty about the predictions after seeing data \\
+$K_{\text{pred,pred}}$ & Our uncertainty \emph{before} seeing data (the prior) \\
+$K_{\text{pred,train}} \cdot K_{\text{train,train}}^{-1} \cdot K_{\text{pred,train}}^\top$ & The uncertainty we \emph{removed} by observing data \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\gut{
+Think of it as: \textbf{posterior uncertainty = prior uncertainty $-$ information gained}.
+You start uncertain everywhere. Each observation chips away at that uncertainty.
+The more data you have near a prediction point, the more gets subtracted.
+}
+
+% ============================================================
+\section*{\color{secblue}Recall the Matrices We Already Computed}
+
+From the worked example (Steps 1--4):
+
+\begin{equation}
+K_{\text{pred,train}} =
+\begin{pmatrix}
+0.8825 & 0.3247 \\
+0.6065 & 0.6065 \\
+0.3247 & 0.8825
+\end{pmatrix}
+\quad \text{(3$\times$2)}
+\tag{S6-2}
+\end{equation}
+
+Row meaning: how much each prediction wavelength ``listens to'' each observed wavelength.
+
+\begin{equation}
+K_{\text{train,train}}^{-1} =
+\begin{pmatrix}
+1.0186 & -0.1378 \\
+-0.1378 & 1.0186
+\end{pmatrix}
+\quad \text{(2$\times$2)}
+\tag{S6-3}
+\end{equation}
+
+\begin{equation}
+K_{\text{pred,pred}} =
+\begin{pmatrix}
+1.0000 & 0.8825 & 0.6065 \\
+0.8825 & 1.0000 & 0.8825 \\
+0.6065 & 0.8825 & 1.0000
+\end{pmatrix}
+\quad \text{(3$\times$3)}
+\tag{S6-4}
+\end{equation}
+
+We also need the transpose of $K_{\text{pred,train}}$ (just swap rows and columns):
+
+\begin{equation}
+K_{\text{pred,train}}^\top =
+\begin{pmatrix}
+0.8825 & 0.6065 & 0.3247 \\
+0.3247 & 0.6065 & 0.8825
+\end{pmatrix}
+\quad \text{(2$\times$3)}
+\tag{S6-5}
+\end{equation}
+
+
+% ============================================================
+\section*{\color{secblue}Sub-step A: Compute $M = K_{\text{pred,train}} \;\cdot\; K_{\text{train,train}}^{-1}$}
+
+This is a (3$\times$2) $\times$ (2$\times$2) = \textbf{3$\times$2} matrix.
+
+\bigskip
+\textbf{Row 1 (450\,nm):}
+\begin{align}
+M_{1,1} &= 0.8825 \times 1.0186 + 0.3247 \times (-0.1378) = 0.8989 - 0.0448 = \mathbf{0.8542} \tag{S6-6a} \\
+M_{1,2} &= 0.8825 \times (-0.1378) + 0.3247 \times 1.0186 = -0.1216 + 0.3308 = \mathbf{0.2091} \tag{S6-6b}
+\end{align}
+
+\textbf{Row 2 (500\,nm):}
+\begin{align}
+M_{2,1} &= 0.6065 \times 1.0186 + 0.6065 \times (-0.1378) = 0.6178 - 0.0836 = \mathbf{0.5342} \tag{S6-7a} \\
+M_{2,2} &= 0.6065 \times (-0.1378) + 0.6065 \times 1.0186 = -0.0836 + 0.6178 = \mathbf{0.5342} \tag{S6-7b}
+\end{align}
+
+\gut{
+Notice $M_{2,1} = M_{2,2}$. That's because 500\,nm is equidistant from both observed wavelengths (400\,nm and 600\,nm), so $K_{\text{pred,train}}$ has identical entries in that row (0.6065, 0.6065).
+}
+
+\textbf{Row 3 (550\,nm):}
+\begin{align}
+M_{3,1} &= 0.3247 \times 1.0186 + 0.8825 \times (-0.1378) = 0.3308 - 0.1216 = \mathbf{0.2091} \tag{S6-8a} \\
+M_{3,2} &= 0.3247 \times (-0.1378) + 0.8825 \times 1.0186 = -0.0448 + 0.8989 = \mathbf{0.8542} \tag{S6-8b}
+\end{align}
+
+\gut{
+Notice Row 3 is Row 1 \emph{flipped}. That's the symmetry: 550\,nm relates to (400, 600) in the mirror-image way that 450\,nm does.
+}
+
+\begin{equation}
+M = K_{\text{pred,train}} \cdot K_{\text{train,train}}^{-1} =
+\begin{pmatrix}
+0.8542 & 0.2091 \\
+0.5342 & 0.5342 \\
+0.2091 & 0.8542
+\end{pmatrix}
+\quad \text{(3$\times$2)}
+\tag{S6-9}
+\end{equation}
+
+
+% ============================================================
+\section*{\color{secblue}Sub-step B: Compute $R = M \;\cdot\; K_{\text{pred,train}}^\top$}
+
+This is the ``information gained'' matrix.
+
+(3$\times$2) $\times$ (2$\times$3) = \textbf{3$\times$3} matrix.
+
+\bigskip
+\textbf{Element (1,1) --- uncertainty removed at 450\,nm about itself:}
+\begin{equation}
+R_{1,1} = 0.8542 \times 0.8825 + 0.2091 \times 0.3247 = 0.7538 + 0.0679 = \mathbf{0.8217}
+\tag{S6-10}
+\end{equation}
+
+\textbf{Element (1,2) --- cross-term between 450\,nm and 500\,nm:}
+\begin{equation}
+R_{1,2} = 0.8542 \times 0.6065 + 0.2091 \times 0.6065 = 0.5181 + 0.1268 = \mathbf{0.6449}
+\tag{S6-11}
+\end{equation}
+
+\textbf{Element (1,3) --- cross-term between 450\,nm and 550\,nm:}
+\begin{equation}
+R_{1,3} = 0.8542 \times 0.3247 + 0.2091 \times 0.8825 = 0.2774 + 0.1845 = \mathbf{0.4619}
+\tag{S6-12}
+\end{equation}
+
+\textbf{Element (2,1):}
+\begin{equation}
+R_{2,1} = 0.5342 \times 0.8825 + 0.5342 \times 0.3247 = 0.4714 + 0.1734 = \mathbf{0.6449}
+\tag{S6-13}
+\end{equation}
+
+\textbf{Element (2,2) --- uncertainty removed at 500\,nm about itself:}
+\begin{equation}
+R_{2,2} = 0.5342 \times 0.6065 + 0.5342 \times 0.6065 = 0.3240 + 0.3240 = \mathbf{0.6480}
+\tag{S6-14}
+\end{equation}
+
+\textbf{Element (2,3):}
+\begin{equation}
+R_{2,3} = 0.5342 \times 0.3247 + 0.5342 \times 0.8825 = 0.1734 + 0.4714 = \mathbf{0.6449}
+\tag{S6-15}
+\end{equation}
+
+\textbf{Element (3,1):}
+\begin{equation}
+R_{3,1} = 0.2091 \times 0.8825 + 0.8542 \times 0.3247 = 0.1845 + 0.2774 = \mathbf{0.4619}
+\tag{S6-16}
+\end{equation}
+
+\textbf{Element (3,2):}
+\begin{equation}
+R_{3,2} = 0.2091 \times 0.6065 + 0.8542 \times 0.6065 = 0.1268 + 0.5181 = \mathbf{0.6449}
+\tag{S6-17}
+\end{equation}
+
+\textbf{Element (3,3) --- uncertainty removed at 550\,nm about itself:}
+\begin{equation}
+R_{3,3} = 0.2091 \times 0.3247 + 0.8542 \times 0.8825 = 0.0679 + 0.7538 = \mathbf{0.8217}
+\tag{S6-18}
+\end{equation}
+
+\begin{equation}
+R = K_{\text{pred,train}} \cdot K_{\text{train,train}}^{-1} \cdot K_{\text{pred,train}}^\top =
+\begin{pmatrix}
+0.8217 & 0.6449 & 0.4619 \\
+0.6449 & 0.6480 & 0.6449 \\
+0.4619 & 0.6449 & 0.8217
+\end{pmatrix}
+\tag{S6-19}
+\end{equation}
+
+\gut{
+$R$ is the ``information gained'' matrix. Look at the diagonal: $R_{1,1} = 0.8217$ and $R_{3,3} = 0.8217$ (high --- we learned a lot about 450\,nm and 550\,nm because they're close to observed points), while $R_{2,2} = 0.6480$ (lower --- we learned less about 500\,nm because it's far from both observations).
+}
+
+
+% ============================================================
+\section*{\color{secblue}Sub-step C: The Final Subtraction}
+
+\begin{equation}
+\Sigma_{\text{pred}} = K_{\text{pred,pred}} - R
+\tag{S6-20}
+\end{equation}
+
+Element by element:
+
+\begin{equation}
+\Sigma_{\text{pred}} =
+\begin{pmatrix}
+1.0000 & 0.8825 & 0.6065 \\
+0.8825 & 1.0000 & 0.8825 \\
+0.6065 & 0.8825 & 1.0000
+\end{pmatrix}
+-
+\begin{pmatrix}
+0.8217 & 0.6449 & 0.4619 \\
+0.6449 & 0.6480 & 0.6449 \\
+0.4619 & 0.6449 & 0.8217
+\end{pmatrix}
+\tag{S6-21}
+\end{equation}
+
+\bigskip
+\textbf{Row 1:}
+\begin{align}
+\Sigma_{1,1} &= 1.0000 - 0.8217 = \mathbf{0.1783} \tag{S6-22a} \\
+\Sigma_{1,2} &= 0.8825 - 0.6449 = \mathbf{0.2376} \tag{S6-22b} \\
+\Sigma_{1,3} &= 0.6065 - 0.4619 = \mathbf{0.1446} \tag{S6-22c}
+\end{align}
+
+\textbf{Row 2:}
+\begin{align}
+\Sigma_{2,1} &= 0.8825 - 0.6449 = \mathbf{0.2376} \tag{S6-23a} \\
+\Sigma_{2,2} &= 1.0000 - 0.6480 = \mathbf{0.3520} \tag{S6-23b} \\
+\Sigma_{2,3} &= 0.8825 - 0.6449 = \mathbf{0.2376} \tag{S6-23c}
+\end{align}
+
+\textbf{Row 3:}
+\begin{align}
+\Sigma_{3,1} &= 0.6065 - 0.4619 = \mathbf{0.1446} \tag{S6-24a} \\
+\Sigma_{3,2} &= 0.8825 - 0.6449 = \mathbf{0.2376} \tag{S6-24b} \\
+\Sigma_{3,3} &= 1.0000 - 0.8217 = \mathbf{0.1783} \tag{S6-24c}
+\end{align}
+
+\begin{equation}
+\boxed{
+\Sigma_{\text{pred}} =
+\begin{pmatrix}
+0.1783 & 0.2376 & 0.1446 \\
+0.2376 & 0.3520 & 0.2376 \\
+0.1446 & 0.2376 & 0.1783
+\end{pmatrix}
+}
+\tag{S6-25}
+\end{equation}
+
+
+% ============================================================
+\section*{\color{secblue}Reading the Result}
+
+The \textbf{diagonal} entries are the variances at each prediction point:
+
+\begin{center}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabular}{cccccc}
+\toprule
+\textbf{Wavelength} & \textbf{Prior Var} & $-$ & \textbf{Info Gained} & $=$ & \textbf{Posterior Var} \\
+\midrule
+450\,nm & 1.0000 & $-$ & 0.8217 & $=$ & \textbf{0.1783} \\
+500\,nm & 1.0000 & $-$ & 0.6480 & $=$ & \textbf{0.3520} \\
+550\,nm & 1.0000 & $-$ & 0.8217 & $=$ & \textbf{0.1783} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\gut{
+Every diagonal entry started at 1.0 (the prior variance --- total uncertainty). Observations chipped away at it:
+\begin{itemize}
+\item 450\,nm and 550\,nm: close to observed bands, so \textbf{lots of information gained} (0.82 removed), leaving \textbf{little uncertainty} (0.18).
+\item 500\,nm: far from both observed bands, so \textbf{less information gained} (0.65 removed), leaving \textbf{more uncertainty} (0.35).
+\end{itemize}
+This is the posterior covariance formula doing exactly what we intuitively expect: \textbf{near data $\rightarrow$ low uncertainty, far from data $\rightarrow$ high uncertainty.}
+}
+
+\bigskip
+The \textbf{off-diagonal} entries tell us how the uncertainties at different prediction points are correlated. For example, $\Sigma_{1,2} = 0.2376$ means: if the true reflectance at 450\,nm turns out to be higher than our prediction, the true reflectance at 500\,nm is also likely to be higher than our prediction (positive correlation of residual errors).
+
+\bigskip
+Standard deviations (for the $\pm 2\sigma$ confidence intervals):
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+\textbf{Wavelength} & $\sigma = \sqrt{\text{variance}}$ & \textbf{95\% CI} ($\pm 2\sigma$) \\
+\midrule
+450\,nm & $\sqrt{0.1783} = 0.4222$ & $\pm\, 0.84$ \\
+500\,nm & $\sqrt{0.3520} = 0.5933$ & $\pm\, 1.19$ \\
+550\,nm & $\sqrt{0.1783} = 0.4222$ & $\pm\, 0.84$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+% ============================================================
+\section*{\color{secblue}Summary of the Full Computation}
+
+\begin{enumerate}
+\item Computed $M = K_{\text{pred,train}} \cdot K_{\text{train,train}}^{-1}$ \hfill (Eq.~S6-9)
+
+``How much each prediction point is influenced by the inverse-weighted observations.''
+
+\item Computed $R = M \cdot K_{\text{pred,train}}^\top$ \hfill (Eq.~S6-19)
+
+``How much information the observations provide about each prediction point.''
+
+\item Subtracted: $\Sigma_{\text{pred}} = K_{\text{pred,pred}} - R$ \hfill (Eq.~S6-25)
+
+``Prior uncertainty minus information gained = posterior uncertainty.''
+\end{enumerate}
+
+\recap{
+This is the matrix version of the scalar formula from Eq.~P18 in the posterior proof document:
+$$\text{Conditional variance} = \sigma_A^2 - \frac{\sigma_{AB}^2}{\sigma_B^2}$$
+The structure is identical: \textbf{prior $-$ learned = posterior}. $\square$
+}
+
+\end{document}
+"""
+
+output_path = "gp_step6_covariance_proof.tex"
+with open(output_path, "w") as f:
+    f.write(latex_content)
+
+print(f"Saved to {output_path}")
